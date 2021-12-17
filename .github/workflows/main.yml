@@ -1,0 +1,34 @@
+name: CICD Demo Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  firebase-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: "14.x"
+
+      - name: Install NPM Dependencies
+        # if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: npm install
+
+      - run: npm run bldev
+
+      - uses: w9jds/firebase-action@master
+        with:
+          args: use demoapp-9e3fa
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting:demoapp-9e3fa
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
